@@ -2,16 +2,25 @@
 
 Team Huddle Live is a real-time collaborative planning application built with TanStack Start, Convex, and OpenAI. It turns live conversation into structured planning items through AI-powered transcript analysis.
 
+## TanStack X Convex Hackathon
+
+This app was created for the [TanStack X Convex Hackathon](https://www.convex.dev/hackathons/tanstack?referrer=jameskeezer) (November 2025)
+
+
+View & Vote for this app on [VibeApps](https://vibeapps.dev/s/team-huddle-live) if you dig it!
+
+
 ## Tech Stack
 
-- **Frontend**: TanStack Start (React Router + SSR), React 19, Tailwind CSS v4
-- **Backend**: Convex (real-time database & functions), TanStack Start server functions
+- **Frontend**: [TanStack Start](https://tanstack.com/start/latest_) (React Router + SSR), React 19, Tailwind CSS v4
+- **Backend**: [Convex](https://www.convex.dev/) (real-time database), TanStack Start server functions
 - **Authentication**: Clerk
-- **Subscriptions**: Autumn.js
+- **Subscriptions**: [Autumn](https://www.useautumn.com/)
 - **AI**: OpenAI (transcription, analysis, summaries, realtime sessions)
-- **Storage**: Cloudflare R2 (avatars)
-- **Deployment**: Cloudflare Workers (via Wrangler)
+- **Observability**: [Sentry](https://www.sentry.io/)
+- **Hosting & Asset Storage**: [Cloudflare](https://www.cloudflare.com/) Workers & R2
 - **State Management**: React Query + Convex React Query integration
+- **AI Code Reviews**: [CodeRabbit](https://www.coderabbit.ai/)
 
 ## Local Development
 
