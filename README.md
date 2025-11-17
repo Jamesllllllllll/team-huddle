@@ -6,9 +6,9 @@ Team Huddle Live is a real-time collaborative planning application built with Ta
 
 This app was created for the [TanStack X Convex Hackathon](https://www.convex.dev/hackathons/tanstack?referrer=jameskeezer) (November 2025)
 
-
 View & Vote for this app on [VibeApps](https://vibeapps.dev/s/team-huddle-live) if you dig it!
 
+<img width="2485" height="1202" alt="team-huddle" src="https://github.com/user-attachments/assets/996fcb38-acae-45d9-b245-78402ba00034" />
 
 ## Tech Stack
 
@@ -31,6 +31,8 @@ View & Vote for this app on [VibeApps](https://vibeapps.dev/s/team-huddle-live) 
 - Convex account (sign up at [convex.dev](https://convex.dev))
 - Clerk account (for authentication)
 - OpenAI API key (for AI features)
+- Cloudflare account (hosting on workers)
+- Autumn account (managing subscriptions)
 
 ### Setup
 
