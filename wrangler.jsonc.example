@@ -1,0 +1,23 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "huddle",
+    "compatibility_date": "2025-09-02",
+    "compatibility_flags": ["nodejs_compat"],
+    "main": "@tanstack/react-start/server-entry",
+    "vars": {
+      "VITE_CONVEX_URL": "",
+      "CLOUDFLARE_R2_PUBLIC_URL": "",
+      "CLERK_JWT_ISSUER_DOMAIN": "",
+      "VITE_CLERK_PUBLISHABLE_KEY": "",
+      "VITE_CLERK_DOMAIN": "",
+    },
+    "observability": {
+      "enabled": true,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "invocation_logs": true,
+        "persist": true
+      }
+  }
+}

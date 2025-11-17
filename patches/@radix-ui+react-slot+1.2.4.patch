@@ -1,0 +1,24 @@
+diff --git a/node_modules/@radix-ui/react-slot/dist/index.mjs b/node_modules/@radix-ui/react-slot/dist/index.mjs
+index d7ea374..d1543c0 100644
+--- a/node_modules/@radix-ui/react-slot/dist/index.mjs
++++ b/node_modules/@radix-ui/react-slot/dist/index.mjs
+@@ -97,17 +97,8 @@ function mergeProps(slotProps, childProps) {
+   return { ...slotProps, ...overrideProps };
+ }
+ function getElementRef(element) {
+-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+-  if (mayWarn) {
+-    return element.ref;
+-  }
+-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+-  if (mayWarn) {
+-    return element.props.ref;
+-  }
+-  return element.props.ref || element.ref;
++  // In React 19, ref is now a regular prop and should only be accessed via element.props.ref
++  return element.props.ref;
+ }
+ export {
+   Slot as Root,
