@@ -1,3 +1,4 @@
+import { messages } from '~/shared/errors'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../../convex/_generated/api'
@@ -173,7 +174,7 @@ export function ResearchDebug({ planningItems, huddleId }: ResearchDebugProps) {
                                                 {researchResult.status === 'failed' && (
                                                     <div className="text-destructive">
                                                         <span className="font-medium">Error:</span>{' '}
-                                                        {researchResult.error}
+                                                        {messages.research}
                                                     </div>
                                                 )}
                                                 {researchResult.status === 'pending' && (

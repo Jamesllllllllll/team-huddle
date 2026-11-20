@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import { useCustomer } from 'autumn-js/react'
 import { useConvexAuth } from 'convex/react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -105,12 +106,13 @@ function AuthenticatedSubscriptionButton() {
           if (isManaging) return
           setIsManaging(true)
           try {
-            const { data } = await openBillingPortal({ returnUrl: getBaseUrl() })
-            if (data?.url) {
-              window.location.href = data.url
-            }
+            const { data, error } = await openBillingPortal({ returnUrl: getBaseUrl() })
+            if (error || !data?.url) throw new Error('Billing portal unavailable')
+            window.location.assign(data.url)
+          } catch {
+            toast.error('We couldn’t open billing. Please try again.')
           } finally {
-            // setIsManaging(false)
+            setIsManaging(false)
           }
         }}
         disabled={isManaging}

@@ -2,7 +2,7 @@ import { Download } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { EditableText } from '../EditableText'
 import { Linear } from '~/components/assets/icons/LinearLogo'
-import { formatDateTime } from '~/utils/dates'
+import { LocalDateTime } from '~/components/LocalDateTime'
 import toast from 'react-hot-toast'
 
 type HuddleHeaderProps = {
@@ -56,11 +56,7 @@ export function HuddleHeader({
                             await onUpdateName(trimmed)
                         } catch (error) {
                             console.error('Failed to update huddle name:', error)
-                            toast.error(
-                                error instanceof Error
-                                    ? error.message
-                                    : 'Failed to update huddle name',
-                            )
+                            toast.error('Failed to update huddle name')
                         }
                     }}
                 />
@@ -68,7 +64,7 @@ export function HuddleHeader({
                 <h1 className="text-3xl font-semibold">{huddleName}</h1>
             )}
             <p className="text-sm text-muted-foreground">
-                Created by {ownerDisplayName} on {formatDateTime(createdAt)}
+                Created by {ownerDisplayName} on <LocalDateTime value={createdAt} format="dateTime" />
             </p>
             <div className="flex items-center gap-3 mt-4 flex-wrap">
                 {isHuddleCompleted ? (

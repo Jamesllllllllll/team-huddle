@@ -126,56 +126,13 @@ export function UserProfileProvider({
     enabled: isAuthenticated,
   })
 
-  const initialProfileRef = React.useRef<{
-    profile: UserProfile
-    loaded: boolean
-  } | null>(null)
-
-  if (!initialProfileRef.current) {
-    // Default placeholder profile (no clientId) to avoid side-effects
-    const placeholder: UserProfile = {
-      clientId: '',
-      name: '',
-      avatar: null,
-      lastUpdated: new Date(0).toISOString(),
-    }
-
-    if (typeof window === 'undefined') {
-      // On the server, never generate a clientId
-      initialProfileRef.current = {
-        profile: placeholder,
-        loaded: false,
-      }
-    } else if (isAuthenticated) {
-      // Authenticated: wait for Convex user; don't touch localStorage yet
-      initialProfileRef.current = {
-        profile: placeholder,
-        loaded: true,
-      }
-    } else if (isAuthLoading) {
-      // Auth resolving: hold placeholder, let effect hydrate from storage later
-      initialProfileRef.current = {
-        profile: placeholder,
-        loaded: false,
-      }
-    } else {
-      // Not authenticated, auth settled: try storage first
-      const stored = readStoredProfile()
-      if (stored) {
-        initialProfileRef.current = { profile: stored, loaded: true }
-      } else {
-        // No stored guest profile yet; delay creation to the guest hydration effect
-        initialProfileRef.current = { profile: placeholder, loaded: false }
-      }
-    }
-  }
-
-  const [profileState, setProfileState] = React.useState<UserProfile>(() => {
-    return initialProfileRef.current!.profile
+  const [profileState, setProfileState] = React.useState<UserProfile>({
+    clientId: '',
+    name: '',
+    avatar: null,
+    lastUpdated: new Date(0).toISOString(),
   })
-  const hasLoadedStorageRef = React.useRef<boolean>(
-    initialProfileRef.current!.loaded,
-  )
+  const hasLoadedStorageRef = React.useRef(false)
 
   // Wrapper around setProfileState that only updates if values actually changed
   // This prevents unnecessary re-renders when the same values are set
@@ -330,7 +287,7 @@ export function UserProfileProvider({
       return
     }
     
-    if (!hasLoadedStorageRef.current) {
+    if (!hasLoadedStorageRef.current || !profile.clientId) {
       return
     }
     if (typeof window === 'undefined') {
@@ -417,8 +374,8 @@ export function UserProfileProvider({
     if (isAuthenticated) {
       return !isAuthLoading && convexUserQuery.isFetched
     }
-    return hasLoadedStorageRef.current
-  }, [isAuthenticated, isAuthLoading, convexUserQuery.isFetched])
+    return !isAuthLoading && !!profile.clientId
+  }, [isAuthenticated, isAuthLoading, convexUserQuery.isFetched, profile.clientId])
 
   const value = React.useMemo(
     () => ({

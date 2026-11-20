@@ -1,9 +1,17 @@
-import { createStart } from '@tanstack/react-start'
+import { createMiddleware, createStart } from '@tanstack/react-start'
+import { messages, publicErrorMessage } from './shared/errors'
 
-// No Clerk middleware - using stable @clerk/clerk-react SDK instead of beta TanStack Start SDK
-// Server-side auth checks can be done directly in server functions when needed
-export const startInstance = createStart(() => {
-  return {
-    requestMiddleware: [],
+const handleServerErrors = createMiddleware({ type: 'function' }).server(async ({ next }) => {
+  try {
+    return await next()
+  } catch (error) {
+    console.error('Server function failed', error)
+    const publicError = new Error(publicErrorMessage(error, messages.request))
+    publicError.stack = undefined
+    throw publicError
   }
 })
+
+export const startInstance = createStart(() => ({
+  functionMiddleware: [handleServerErrors],
+}))

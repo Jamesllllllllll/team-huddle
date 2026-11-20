@@ -154,7 +154,7 @@ export function SubscriptionDialog({ open, onOpenChange }: SubscriptionDialogPro
                             })
                             if (error) {
                               console.error('Attach error:', error)
-                              toast.error(error.message || 'Failed to upgrade')
+                              toast.error('Failed to upgrade. Please try again.')
                               return
                             }
                             if (data && 'checkout_url' in data && data.checkout_url) {
@@ -192,7 +192,7 @@ export function SubscriptionDialog({ open, onOpenChange }: SubscriptionDialogPro
                             })
                             if (error) {
                               console.error('Cancel error:', error)
-                              toast.error(error.message || 'Failed to cancel subscription')
+                              toast.error('Failed to cancel subscription. Please try again.')
                               return
                             }
                             toast.success('Subscription cancelled successfully')
@@ -218,7 +218,7 @@ export function SubscriptionDialog({ open, onOpenChange }: SubscriptionDialogPro
                             })
                             if (error) {
                               console.error('Reactivate error:', error)
-                              toast.error(error.message || 'Failed to reactivate subscription')
+                              toast.error('Failed to reactivate subscription. Please try again.')
                               return
                             }
                             if (data && 'checkout_url' in data && data.checkout_url) {
@@ -248,7 +248,7 @@ export function SubscriptionDialog({ open, onOpenChange }: SubscriptionDialogPro
                           })
                           if (error) {
                             console.error('Billing portal error:', error)
-                            toast.error(error.message || 'Failed to open billing portal')
+                            toast.error('Failed to open billing portal. Please try again.')
                             return
                           }
                           if (data?.url) {
@@ -280,7 +280,7 @@ export function SubscriptionDialog({ open, onOpenChange }: SubscriptionDialogPro
                         })
                         if (error) {
                           console.error('Checkout error:', error)
-                          toast.error(error.message || 'Failed to start checkout')
+                          toast.error('Failed to start checkout. Please try again.')
                           return
                         }
                         if (data?.url) {

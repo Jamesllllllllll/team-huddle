@@ -107,21 +107,12 @@ export function ParticipantsPanel<T extends ParticipantListEntry = ParticipantLi
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const [inviteUserId, setInviteUserId] = useState('')
     const [isInvitePending, setIsInvitePending] = useState(false)
-    const { isMobile } = useIsMobile()
-    const [accordionValue, setAccordionValue] = useState<string>(() => {
-        // Start expanded on desktop, collapsed on mobile
-        if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-            return 'participants'
-        }
-        return ''
-    })
-    
+    const { isMobile, isLoading } = useIsMobile()
+    const [accordionValue, setAccordionValue] = useState('')
+
     useEffect(() => {
-        // On desktop, always keep expanded; on mobile, allow collapsing
-        if (!isMobile) {
-            setAccordionValue('participants')
-        }
-    }, [isMobile])
+        if (!isLoading && !isMobile) setAccordionValue('participants')
+    }, [isLoading, isMobile])
 
     const huddleActionLabel = isHuddleActive ? 'End huddle' : 'Start huddle'
     const huddleActionPendingLabel = isHuddleActive ? 'Ending…' : 'Starting…'

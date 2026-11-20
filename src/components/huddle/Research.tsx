@@ -1,3 +1,4 @@
+import { messages } from '~/shared/errors'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../../convex/_generated/api'
@@ -41,7 +42,7 @@ export function Research({ planningItemId }: ResearchProps) {
     return null
   }
 
-  const { summary, sources, status, error } = researchResult.data
+  const { summary, sources, status } = researchResult.data
 
   if (status === 'pending') {
     return (
@@ -60,7 +61,7 @@ export function Research({ planningItemId }: ResearchProps) {
       <Card>
         <CardContent className="p-4">
           <p className="text-sm text-destructive">
-            Research failed: {error ?? 'Unknown error'}
+            {messages.research}
           </p>
         </CardContent>
       </Card>

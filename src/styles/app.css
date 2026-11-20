@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import '@clerk/themes/shadcn.css';
-@import '@fontsource-variable/public-sans';
 
 @container planning-column (max-width: 299px) {
   .planning-item-list {

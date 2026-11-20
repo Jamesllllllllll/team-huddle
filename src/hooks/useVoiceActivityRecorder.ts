@@ -1,3 +1,4 @@
+import { messages, microphoneErrorMessage, publicErrorMessage } from '~/shared/errors'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export type VoiceActivityTurn = {
@@ -158,10 +159,7 @@ export function useVoiceActivityRecorder({
         await onTurn(turn)
         setError(null)
       } catch (turnError) {
-        const message =
-          turnError instanceof Error
-            ? turnError.message
-            : 'Failed to send recorded turn to the server.'
+        const message = publicErrorMessage(turnError, messages.recording)
         setError(message)
         debugLog('onTurn error', turnError)
       }
@@ -423,10 +421,7 @@ export function useVoiceActivityRecorder({
     } catch (requestError) {
       debugLog('Failed to start recorder', requestError)
       stop()
-      const message =
-        requestError instanceof Error
-          ? requestError.message
-          : 'Unable to access the microphone.'
+      const message = microphoneErrorMessage(requestError)
       setError(message)
       setStatus('error')
       statusRef.current = 'error'

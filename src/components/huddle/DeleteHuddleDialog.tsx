@@ -42,11 +42,7 @@ export function DeleteHuddleDialog({
             onNavigate()
         } catch (error) {
             console.error('Failed to delete huddle:', error)
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : 'Failed to delete huddle',
-            )
+            toast.error('Failed to delete huddle')
         }
     }
 

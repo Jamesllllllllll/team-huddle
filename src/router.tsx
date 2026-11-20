@@ -67,8 +67,8 @@ export function getRouter() {
 				},
 			},
 			mutationCache: new MutationCache({
-				onError: (error) => {
-					toast(error.message, { className: 'bg-red-500 text-white' })
+				onError: () => {
+					toast.error('We couldn’t save that change. Please try again.')
 				},
 			}),
 		})
@@ -84,8 +84,8 @@ export function getRouter() {
 					},
 				},
 				mutationCache: new MutationCache({
-					onError: (error) => {
-						toast(error.message, { className: 'bg-red-500 text-white' })
+					onError: () => {
+						toast.error('We couldn’t save that change. Please try again.')
 					},
 				}),
 			})

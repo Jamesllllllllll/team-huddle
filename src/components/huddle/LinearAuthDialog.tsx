@@ -41,9 +41,7 @@ export function LinearAuthDialog({
       window.location.href = authUrl
     } catch (error) {
       console.error('Failed to initiate Linear OAuth', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to start Linear authentication',
-      )
+      toast.error('Failed to start Linear authentication')
       setIsLoading(false)
     }
   }

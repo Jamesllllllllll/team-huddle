@@ -1,3 +1,4 @@
+import { messages } from '~/shared/errors'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { ConvexHttpClient } from 'convex/browser'
@@ -62,61 +63,12 @@ export const testOpenAIApiKey = createServerFn({ method: 'POST' })
 
       throw new Error('OpenAI API returned an unexpected response format.')
     } catch (error: unknown) {
-      // Handle OpenAI API errors - check for status code
       if (error && typeof error === 'object') {
-        // Check for status property (OpenAI SDK errors)
-        if ('status' in error) {
-          const status = error.status as number
-          if (status === 401) {
-            throw new Error('Invalid API key. Please check your key and try again.')
-          }
-          if (status === 429) {
-            throw new Error('API rate limit exceeded. Please try again later.')
-          }
-          if (status === 403) {
-            throw new Error('API key does not have permission to make requests.')
-          }
-        }
-
-        // Check for OpenAI error structure
-        if ('code' in error || 'type' in error) {
-          const errorObj = error as { code?: string; type?: string; message?: string }
-          if (errorObj.code === 'invalid_api_key' || errorObj.type === 'invalid_request_error') {
-            throw new Error('Invalid API key. Please check your key and try again.')
-          }
-          if (errorObj.code === 'rate_limit_exceeded') {
-            throw new Error('API rate limit exceeded. Please try again later.')
-          }
-        }
+        const { status, code } = error as { status?: number; code?: string }
+        if (status === 401 || code === 'invalid_api_key') throw new Error(messages.keyInvalid)
+        if (status === 403) throw new Error(messages.keyPermission)
       }
-
-      // Check for specific error messages in the error string
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      const lowerMessage = errorMessage.toLowerCase()
-      
-      if (
-        lowerMessage.includes('invalid api key') ||
-        lowerMessage.includes('401') ||
-        lowerMessage.includes('unauthorized') ||
-        lowerMessage.includes('authentication failed')
-      ) {
-        throw new Error('Invalid API key. Please check your key and try again.')
-      }
-      if (
-        lowerMessage.includes('rate limit') ||
-        lowerMessage.includes('429') ||
-        lowerMessage.includes('too many requests')
-      ) {
-        throw new Error('API rate limit exceeded. Please try again later.')
-      }
-      if (lowerMessage.includes('forbidden') || lowerMessage.includes('403')) {
-        throw new Error('API key does not have permission to make requests.')
-      }
-
-      // Generic error with original message
-      throw new Error(
-        `Failed to verify API key: ${errorMessage}. Please check your key and try again.`,
-      )
+      throw new Error(messages.keyBusy)
     }
   })
 

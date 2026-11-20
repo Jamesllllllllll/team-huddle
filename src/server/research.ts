@@ -1,3 +1,4 @@
+import { messages } from '~/shared/errors'
 import { createServerFn } from '@tanstack/react-start'
 import { ConvexHttpClient } from 'convex/browser'
 import { z } from 'zod'
@@ -81,16 +82,14 @@ export const performResearch = createServerFn({ method: 'POST' })
         sources: result.sources,
       }
     } catch (error) {
-      // Update with error
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred'
+      console.error('Research failed', error)
       await convexClient.mutation(api.huddle.updateResearchResult, {
         id: researchResultId,
         status: 'failed',
-        error: errorMessage,
+        error: messages.research,
       })
 
-      throw error
+      throw new Error(messages.research)
     }
   })
 

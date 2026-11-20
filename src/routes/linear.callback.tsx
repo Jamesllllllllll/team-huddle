@@ -43,9 +43,12 @@ function LinearCallback() {
       window.history.replaceState({}, document.title, window.location.pathname)
 
       if (errorParam) {
-        setError(`OAuth error: ${errorParam}`)
+        const message = errorParam === 'access_denied'
+          ? 'You cancelled the Linear connection.'
+          : 'We couldn’t connect to Linear. Please try again.'
+        setError(message)
         setStatus('error')
-        toast.error(`Failed to authenticate with Linear: ${errorParam}`)
+        toast.error(message)
         setTimeout(() => {
           const returnUrl = sessionStorage.getItem('linear-oauth-return-url') || '/'
           sessionStorage.removeItem('linear-oauth-return-url')
@@ -59,9 +62,9 @@ function LinearCallback() {
       }
 
       if (!code || !state) {
-        setError('Missing authorization code or state')
+        setError('Start the Linear connection again to continue.')
         setStatus('error')
-        toast.error('Invalid OAuth callback')
+        toast.error('Start the Linear connection again to continue.')
         setTimeout(() => {
           const returnUrl = sessionStorage.getItem('linear-oauth-return-url') || '/'
           sessionStorage.removeItem('linear-oauth-return-url')
@@ -142,8 +145,7 @@ function LinearCallback() {
         }, 1500)
       } catch (err) {
         console.error('Failed to exchange Linear OAuth code', err)
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to authenticate with Linear'
+        const errorMessage = 'We couldn’t connect to Linear. Please try again.'
         setError(errorMessage)
         setStatus('error')
         toast.error(errorMessage)

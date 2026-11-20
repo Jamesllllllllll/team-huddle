@@ -12,7 +12,7 @@ import {
 import { Loader } from '~/components/Loader'
 import { UserProfileSetup } from '~/components/UserProfileSetup'
 import { useUserProfile } from '~/context/UserProfileContext'
-import { formatDate } from '~/utils/dates'
+import { LocalDateTime } from '~/components/LocalDateTime'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -54,6 +54,9 @@ const homeDebugLog = (message: string, details?: Record<string, unknown>) => {
 }
 
 export const Route = createFileRoute('/')({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(huddleQueries.list())
+  },
   component: Home,
   pendingComponent: () => <Loader />,
 })
@@ -243,8 +246,7 @@ function Home() {
       homeDebugLog('reset failed', {
         errorMessage: error instanceof Error ? error.message : String(error),
       })
-      const errorMessage = error instanceof Error ? error.message : 'Unable to reset huddles right now.'
-      toast.error(errorMessage)
+      toast.error('Unable to reset huddles right now.')
     }
   }
 
@@ -379,7 +381,7 @@ function Home() {
                               {huddle.name}
                             </CardTitle>
                             <CardDescription>
-                              Created {formatDate(huddle.createdAt)}
+                              Created <LocalDateTime value={huddle.createdAt} format="date" />
                             </CardDescription>
                           </div>
                           {isPrivate && (
@@ -426,7 +428,7 @@ function Home() {
                             {huddle.name}
                           </CardTitle>
                           <CardDescription>
-                            Created {formatDate(huddle.createdAt)}
+                            Created <LocalDateTime value={huddle.createdAt} format="date" />
                           </CardDescription>
                         </div>
                         <Badge

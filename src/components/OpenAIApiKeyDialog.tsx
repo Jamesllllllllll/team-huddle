@@ -1,3 +1,4 @@
+import { publicErrorMessage } from '~/shared/errors'
 import * as React from 'react'
 import {
   Dialog,
@@ -97,7 +98,7 @@ export function OpenAIApiKeyDialog({
         setIsSubmitting(false)
         
         const message =
-          error instanceof Error ? error.message : 'Failed to verify API key'
+          publicErrorMessage(error, 'We couldn’t save your API key. Please try again.')
         
         // Show error in the dialog
         setTestError(message)
@@ -126,9 +127,7 @@ export function OpenAIApiKeyDialog({
       onSuccess?.()
     } catch (error) {
       console.error('Failed to delete API key', error)
-      const message =
-        error instanceof Error ? error.message : 'Failed to delete API key'
-      toast.error(message)
+      toast.error('We couldn’t delete your API key. Please try again.')
     } finally {
       setIsDeleting(false)
     }

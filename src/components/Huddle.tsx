@@ -1,3 +1,4 @@
+import { messages, microphoneErrorMessage, publicErrorMessage } from '~/shared/errors'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -37,7 +38,6 @@ import { RecordingControlsCard } from './huddle/RecordingControlsCard'
 import { TranscriptCard } from './huddle/TranscriptCard'
 import { FreeHuddleTimer } from './huddle/FreeHuddleTimer'
 import { ReportModal } from './huddle/ReportModal'
-import { formatDateTime } from '~/utils/dates'
 import { LinearAuthDialog } from './huddle/LinearAuthDialog'
 import { LinearProjectDialog } from './huddle/LinearProjectDialog'
 import { DevCountdown } from './huddle/DevCountdown'
@@ -362,11 +362,12 @@ export function Huddle({ slug }: { slug: string }) {
         const hasValidShareKey = !isPrivate || (typeof shareKey === 'string' && shareKey === huddle.privateAccessKey)
 
         // Track current time to detect time limit expiration in real-time
-        const [currentTime, setCurrentTime] = useState(() => Date.now())
+        const [currentTime, setCurrentTime] = useState<number | null>(null)
 
         // Update current time every second to detect expiration
         useEffect(() => {
             if (isHuddleCompleted || !isTimeLimited) return
+            setCurrentTime(Date.now())
 
             const interval = setInterval(() => {
                 setCurrentTime(Date.now())
@@ -377,7 +378,7 @@ export function Huddle({ slug }: { slug: string }) {
 
         // Compute free time limit expiration locally to gate UI immediately
         const isFreeLimitExceeded = useMemo(() => {
-            if (!isTimeLimited) return false
+            if (!isTimeLimited || currentTime === null) return false
             const createdAtMs = new Date(huddle.createdAt).getTime()
             if (Number.isNaN(createdAtMs)) return false
             return currentTime - createdAtMs >= FREE_HUDDLE_DURATION_MS
@@ -391,7 +392,7 @@ export function Huddle({ slug }: { slug: string }) {
         useEffect(() => {
             if (hasAttemptedAutoEndRef.current) return
             if (isHuddleCompleted) return
-            if (!isTimeLimited) return
+            if (!isTimeLimited || currentTime === null) return
             const createdAtMs = new Date(huddle.createdAt).getTime()
             if (Number.isNaN(createdAtMs)) return
             const elapsedMs = currentTime - createdAtMs
@@ -820,7 +821,7 @@ export function Huddle({ slug }: { slug: string }) {
                     setMicrophoneStatusMessage('Microphone access granted. Tap start recording to begin.')
                 } catch (error) {
                     const message =
-                        error instanceof Error ? error.message : 'Microphone permission denied.'
+                        microphoneErrorMessage(error)
                     setMicrophoneStatusMessage(message)
                     return
                 }
@@ -835,7 +836,7 @@ export function Huddle({ slug }: { slug: string }) {
             } catch (error) {
                 console.error('Failed to start recording', error)
                 const message =
-                    error instanceof Error ? error.message : 'Unable to start microphone recording.'
+                    microphoneErrorMessage(error)
                 setMicrophoneStatusMessage(message)
             }
         }, [
@@ -866,7 +867,7 @@ export function Huddle({ slug }: { slug: string }) {
                     return
                 }
                 if (!isParticipant) {
-                    throw new Error('Join the huddle before sending audio.')
+                    throw new Error(messages.join)
                 }
 
                 const audioFile = normalizeAudioBlob(blob)
@@ -894,15 +895,9 @@ export function Huddle({ slug }: { slug: string }) {
                         : `${Date.now()}-${Math.random().toString(16).slice(2)}`
                 formData.set('requestId', requestId)
 
-                try {
-                    const response = await speakToHuddle({ data: formData })
-                    setConversationId(response?.conversationId ?? null)
-                    debugLog('recording processed', { response })
-                } catch (submissionError) {
-                    throw submissionError instanceof Error
-                        ? submissionError
-                        : new Error('Failed to process the microphone recording.')
-                }
+                const response = await speakToHuddle({ data: formData })
+                setConversationId(response?.conversationId ?? null)
+                debugLog('recording processed', { response })
             },
             [
                 conversationId,
@@ -928,11 +923,7 @@ export function Huddle({ slug }: { slug: string }) {
                     await submitRecording({ blob, mimeType, durationMs })
                 } catch (submissionError) {
                     console.error('Failed to process auto-detected recording', submissionError)
-                    const fallbackMessage = 'Unable to process the automatically captured audio.'
-                    const message =
-                        submissionError instanceof Error && submissionError.message
-                            ? submissionError.message
-                            : fallbackMessage
+                    const message = publicErrorMessage(submissionError, messages.recording)
                     setAutoRecorderMessage(message)
                     toast.error(message)
                 }
@@ -963,11 +954,7 @@ export function Huddle({ slug }: { slug: string }) {
                 })
             } catch (error) {
                 console.error('Failed to process voice recording', error)
-                const fallbackMessage = 'Unable to process the microphone recording.'
-                const message =
-                    error instanceof Error && error.message
-                        ? error.message
-                        : fallbackMessage
+                const message = publicErrorMessage(error, messages.recording)
                 setMicrophoneStatusMessage(message)
                 toast.error(message)
             }
@@ -2032,11 +2019,7 @@ export function Huddle({ slug }: { slug: string }) {
                     toast.success(enabled ? 'Huddle is now invite-only' : 'Huddle is now public')
                 } catch (error) {
                     console.error('Failed to toggle invite-only', error)
-                    toast.error(
-                        error instanceof Error
-                            ? error.message
-                            : 'Failed to update invite-only settings',
-                    )
+                    toast.error('Failed to update invite-only settings')
                 }
             },
             [huddleId, profile.clientId, setInviteOnly],
@@ -2061,11 +2044,7 @@ export function Huddle({ slug }: { slug: string }) {
                     toast.success(enabled ? 'Huddle is now private' : 'Huddle is now public')
                 } catch (error) {
                     console.error('Failed to toggle private mode', error)
-                    toast.error(
-                        error instanceof Error
-                            ? error.message
-                            : 'Failed to update privacy settings',
-                    )
+                    toast.error('Failed to update privacy settings')
                 }
             },
             [huddleId, profile.clientId, setPrivate, setInviteOnly, isInviteOnly],
@@ -2084,9 +2063,7 @@ export function Huddle({ slug }: { slug: string }) {
                     toast.success('User invited successfully')
                 } catch (error) {
                     console.error('Failed to invite user', error)
-                    toast.error(
-                        error instanceof Error ? error.message : 'Failed to invite user',
-                    )
+                    toast.error('Failed to invite user')
                 }
             },
             [huddleId, profile.clientId, inviteUser],
@@ -2103,9 +2080,7 @@ export function Huddle({ slug }: { slug: string }) {
                     toast.success('Invitation removed')
                 } catch (error) {
                     console.error('Failed to remove invite', error)
-                    toast.error(
-                        error instanceof Error ? error.message : 'Failed to remove invitation',
-                    )
+                    toast.error('Failed to remove invitation')
                 }
             },
             [huddleId, profile.clientId, removeInvite],
@@ -2394,6 +2369,7 @@ export function Huddle({ slug }: { slug: string }) {
                 </div>
                 {isTimeLimited ? (
                     <FreeHuddleTimer
+                        currentTime={currentTime}
                         createdAt={huddle.createdAt}
                         isCompleted={isHuddleCompleted}
                         onAutoEnd={handleAutoEndHuddle}

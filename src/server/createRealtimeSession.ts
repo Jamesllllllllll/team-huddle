@@ -91,12 +91,7 @@ export const createRealtimeClientSecret = createServerFn({ method: 'POST' })
     })
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => '')
-      throw new Error(
-        `Failed to create realtime client secret (${response.status} ${response.statusText})${
-          errorText ? `: ${errorText}` : ''
-        }`,
-      )
+      throw new Error(`Realtime session failed (HTTP ${response.status})`)
     }
 
     const secret = (await response.json()) as ClientSecretResponse

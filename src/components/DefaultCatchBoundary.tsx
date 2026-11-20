@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import {
-  ErrorComponent,
   Link,
   rootRouteId,
   useMatch,
@@ -25,7 +24,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
 
   return (
     <div className="min-w-0 flex-1 p-4 flex flex-col items-center justify-center gap-6">
-      <ErrorComponent error={error} />
+      <p role="alert">We couldn’t load this page. Please try again.</p>
       <div className="flex gap-2 items-center flex-wrap">
         <Button
           onClick={() => {

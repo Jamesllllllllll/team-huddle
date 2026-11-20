@@ -128,9 +128,7 @@ export function LinearProjectDialog({
         return
       }
 
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to load Linear teams',
-      )
+      toast.error('Failed to load Linear teams')
     } finally {
       setIsLoadingTeams(false)
     }
@@ -201,9 +199,7 @@ export function LinearProjectDialog({
         return
       }
 
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create Linear project',
-      )
+      toast.error('Failed to create Linear project')
     } finally {
       setIsCreating(false)
     }

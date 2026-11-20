@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useHydrated } from '@tanstack/react-router'
+import { microphoneErrorMessage } from '~/shared/errors'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type PermissionState = 'idle' | 'pending' | 'granted' | 'denied'
 
@@ -30,7 +32,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}) {
   const chunkRef = useRef<BlobPart[]>([])
   const startTimestampRef = useRef<number | null>(null)
 
-  const isSupported = useMemo(() => isMediaRecorderSupported(), [])
+  const isSupported = useHydrated() && isMediaRecorderSupported()
 
   // Check existing microphone permission on mount
   useEffect(() => {
@@ -112,10 +114,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}) {
     } catch (requestError) {
       console.error('Failed to obtain microphone permission', requestError)
       setPermission('denied')
-      const message =
-        requestError instanceof Error
-          ? requestError.message
-          : 'Microphone permission was denied.'
+      const message = microphoneErrorMessage(requestError)
       setError(message)
       throw requestError
     }
@@ -182,11 +181,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}) {
 
     recorder.addEventListener('error', (recorderError) => {
       console.error('MediaRecorder error:', recorderError)
-      setError(
-        recorderError instanceof Error
-          ? recorderError.message
-          : 'An unexpected recording error occurred.',
-      )
+      setError('Recording stopped unexpectedly. Please try again.')
       setIsRecording(false)
     })
 

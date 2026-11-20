@@ -113,11 +113,7 @@ export function useRealtimePrototype({
       if (secretRequestIdRef.current !== nextRequestId) {
         throw secretError
       }
-      const message =
-        secretError instanceof Error
-          ? secretError.message
-          : 'Failed to mint realtime client secret.'
-      setError(message)
+      setError('Live audio is unavailable. Please try again later.')
       setStatus('error')
       throw secretError
     }
@@ -223,12 +219,7 @@ export function useRealtimePrototype({
       })
 
       if (!callResponse.ok) {
-        const errorText = await callResponse.text().catch(() => '')
-        throw new Error(
-          `Realtime call creation failed (${callResponse.status} ${callResponse.statusText})${
-            errorText ? `: ${errorText}` : ''
-          }`,
-        )
+        throw new Error(`Realtime connection failed (HTTP ${callResponse.status})`)
       }
 
       const locationHeader = callResponse.headers.get('location')
@@ -248,11 +239,7 @@ export function useRealtimePrototype({
       console.error('[RealtimePrototype] connect() failed', connectionError)
       resetConnectionState()
       setStatus('error')
-      setError(
-        connectionError instanceof Error
-          ? connectionError.message
-          : 'Failed to connect to realtime session.',
-      )
+      setError('We couldn’t connect live audio. Please try again.')
     }
   }, [clientSecret, huddleSlug, refreshSecret, resetConnectionState, status])
 

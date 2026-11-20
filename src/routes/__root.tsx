@@ -15,6 +15,7 @@ import { Toaster } from 'react-hot-toast'
 import { ToastBar } from '~/components/ToastBar'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
+import publicSansCss from '@fontsource-variable/public-sans/index.css?url'
 import appCss from '~/styles/app.css?url'
 import { seo } from '~/utils/seo'
 import { Loader } from '~/components/Loader'
@@ -65,6 +66,7 @@ export const Route = createRootRouteWithContext<{
       }),
     ],
     links: [
+      { rel: 'stylesheet', href: publicSansCss },
       { rel: 'stylesheet', href: appCss },
       { rel: 'manifest', href: '/site.webmanifest', color: '#fffff' },
       { rel: 'icon', href: 'https://fav.farm/🏝️' },
@@ -101,9 +103,11 @@ export const Route = createRootRouteWithContext<{
   }),
   errorComponent: (props) => {
     return (
-      <RootDocument>
-        <DefaultCatchBoundary {...props} />
-      </RootDocument>
+      <ThemeProvider>
+        <RootDocument>
+          <DefaultCatchBoundary {...props} />
+        </RootDocument>
+      </ThemeProvider>
     )
   },
   notFoundComponent: () => <NotFound />,
@@ -170,15 +174,12 @@ function MinimalRootDocumentContent() {
       </head>
       <body className="bg-background">
         <div className="h-screen flex flex-col min-h-0">
-          <div className="bg-rose-600 text-white px-4 py-2">
-            Missing Clerk configuration. Set VITE_CLERK_PUBLISHABLE_KEY to enable authentication.
-          </div>
           <div className="flex-1 min-h-0">
             <div className="h-full flex items-center justify-center p-6 text-center">
               <div className="max-w-md space-y-2">
                 <h1 className="text-xl font-semibold">Authentication Unavailable</h1>
                 <p className="text-sm text-muted-foreground">
-                  Clerk is not configured. The app cannot provide sign-in or synced features without it.
+                  Sign-in is temporarily unavailable. Please try again later.
                 </p>
               </div>
             </div>

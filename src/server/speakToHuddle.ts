@@ -1,3 +1,4 @@
+import { messages, publicErrorMessage } from '~/shared/errors'
 import { createServerFn } from '@tanstack/react-start'
 import { ConvexHttpClient } from 'convex/browser'
 import { Buffer } from 'node:buffer'
@@ -429,7 +430,6 @@ export const speakToHuddle = createServerFn({ method: 'POST' })
   })
   .handler(async (ctx) => {
     const formData = ctx.data
-    let requestIdForLogs: string | null = null
     let logContext: Record<string, unknown> = {}
 
     try {
@@ -459,7 +459,7 @@ export const speakToHuddle = createServerFn({ method: 'POST' })
 
       const buffer = Buffer.from(await audioEntry.arrayBuffer())
       if (buffer.byteLength === 0) {
-        throw new Error('Received empty audio payload.')
+        throw new Error(messages.audioFormat)
       }
 
       const originalMimeType =
@@ -480,7 +480,6 @@ export const speakToHuddle = createServerFn({ method: 'POST' })
         mimeType === 'audio/webm' || (extension && extension.toLowerCase() === 'webm')
 
       const requestId = fields.requestId ?? randomUUID()
-      requestIdForLogs = requestId
 
       logContext = {
         requestId,
@@ -552,20 +551,16 @@ export const speakToHuddle = createServerFn({ method: 'POST' })
               stage: 'transcription:fallback:error',
               error: serializedFallbackError,
             })
-            throw new Error(
-              `OpenAI transcription failed after fallback: ${buildErrorSummary(serializedFallbackError)}`,
-            )
+            throw new Error(isUnsupportedAudioError(fallbackError) ? messages.audioFormat : messages.transcriptionUnavailable)
           }
         } else {
-          throw new Error(
-            `OpenAI transcription failed: ${buildErrorSummary(serializedPrimaryError)}`,
-          )
+          throw new Error(isUnsupportedAudioError(primaryError) ? messages.audioFormat : messages.transcriptionUnavailable)
         }
       }
 
       const transcriptText = transcription.text?.trim()
       if (!transcriptText) {
-        throw new Error('OpenAI did not return transcript text.')
+        throw new Error(messages.noSpeech)
       }
 
       const transcriptPreview =
@@ -792,13 +787,7 @@ export const speakToHuddle = createServerFn({ method: 'POST' })
       return await runPostTranscription()
     } catch (error) {
       const serializedError = await serializeError(error)
-      const summary = truncate(buildErrorSummary(serializedError), 600) ?? 'Unknown error'
       console.error('speakToHuddle failed', { ...logContext, error: serializedError })
-      if (requestIdForLogs) {
-        throw new Error(`Transcription failed (request ${requestIdForLogs}): ${summary}`)
-      }
-      throw new Error(`Transcription failed: ${summary}`)
+      throw new Error(publicErrorMessage(error, messages.recording))
     }
   })
-
-

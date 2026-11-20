@@ -7,7 +7,7 @@ import {
 } from '~/components/ui/card'
 import { getInitials, getTranscriptBadgeClasses, getTranscriptBadgeLabel, truncateBadgeText } from './utils'
 import { TRANSCRIPT_BADGE_BASE_CLASSES } from './constants'
-import { formatTime } from '~/utils/dates'
+import { LocalDateTime } from '~/components/LocalDateTime'
 import type {
     ParticipantListEntry,
     SpeakerStyle,
@@ -135,7 +135,7 @@ export function TranscriptCard<TParticipant extends ParticipantListEntry = Parti
                                                     {participantName}
                                                 </span>
                                                 <span className="text-xs text-slate-500 dark:text-slate-400 leading-none">
-                                                    {formatTime(entry.createdAt)}
+                                                    <LocalDateTime value={entry.createdAt} format="time" />
                                                 </span>
                                             </div>
                                         ) : null}

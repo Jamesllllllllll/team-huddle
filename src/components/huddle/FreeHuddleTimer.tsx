@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Card, CardContent } from '~/components/ui/card'
 import { Clock } from 'lucide-react'
 import { FREE_HUDDLE_DURATION_MS } from '~/shared/huddle'
 
 type FreeHuddleTimerProps = {
+    currentTime: number | null
     createdAt: string
     isCompleted: boolean
     onAutoEnd: () => void
@@ -16,6 +17,7 @@ type FreeHuddleTimerProps = {
 
 export function FreeHuddleTimer({
     createdAt,
+    currentTime,
     isCompleted,
     onAutoEnd,
     isOwner = false,
@@ -23,22 +25,10 @@ export function FreeHuddleTimer({
     isCheckoutBusy,
     onSubscribe,
 }: FreeHuddleTimerProps) {
-    const [currentTime, setCurrentTime] = useState(Date.now())
     const hasCalledAutoEnd = useRef(false)
 
-    useEffect(() => {
-        if (isCompleted) {
-            return
-        }
-
-        const interval = setInterval(() => {
-            setCurrentTime(Date.now())
-        }, 1000) // Update every second
-
-        return () => clearInterval(interval)
-    }, [isCompleted])
-
     const { remainingMs, isExpired } = useMemo(() => {
+        if (currentTime === null) return { remainingMs: FREE_HUDDLE_DURATION_MS, isExpired: false }
         const createdAtMs = new Date(createdAt).getTime()
         if (Number.isNaN(createdAtMs)) {
             return { remainingMs: 0, isExpired: true }
@@ -132,7 +122,7 @@ export function FreeHuddleTimer({
                                 >
                                     Time remaining:{' '}
                                     <span className="font-mono font-semibold">
-                                        {formatTime(remainingMs)}
+                                        {currentTime === null ? '…' : formatTime(remainingMs)}
                                     </span>
                                 </p>
                                 <p

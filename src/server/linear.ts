@@ -1,3 +1,4 @@
+import { messages } from '~/shared/errors'
 import { createServerFn } from '@tanstack/react-start'
 import { ConvexHttpClient } from 'convex/browser'
 import { z } from 'zod'
@@ -171,8 +172,8 @@ const CREATE_ISSUE_MUTATION = `
 
 // Custom error class for authentication errors
 export class LinearAuthenticationError extends Error {
-  constructor(message: string) {
-    super(message)
+  constructor() {
+    super(messages.linearReconnect)
     this.name = 'LinearAuthenticationError'
     // Add a property that will be preserved during serialization
     Object.defineProperty(this, 'isLinearAuthError', {
@@ -186,7 +187,7 @@ export class LinearAuthenticationError extends Error {
 // Helper to check if an error is a Linear authentication error
 // This works even after server function serialization
 export function isLinearAuthenticationError(error: unknown): boolean {
-  if (error instanceof LinearAuthenticationError) {
+  if (error instanceof LinearAuthenticationError || (error instanceof Error && error.message === messages.linearReconnect)) {
     return true
   }
   if (error instanceof Error) {
@@ -250,9 +251,7 @@ async function linearGraphQLRequest<T>(
     
     // Check for 401 Unauthorized - token revoked or invalid
     if (response.status === 401) {
-      throw new LinearAuthenticationError(
-        `Linear authentication failed: ${response.status} ${response.statusText} - ${errorText}`,
-      )
+      throw new LinearAuthenticationError()
     }
     
     throw new Error(`Linear API error: ${response.status} ${response.statusText} - ${errorText}`)
@@ -269,9 +268,7 @@ async function linearGraphQLRequest<T>(
     )
     
     if (authError) {
-      throw new LinearAuthenticationError(
-        `Linear authentication failed: ${JSON.stringify(result.errors)}`,
-      )
+      throw new LinearAuthenticationError()
     }
     
     throw new Error(`Linear GraphQL errors: ${JSON.stringify(result.errors)}`)

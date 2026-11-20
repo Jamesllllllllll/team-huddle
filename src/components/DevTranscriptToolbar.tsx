@@ -290,11 +290,7 @@ export function DevTranscriptToolbar({
           )
         } catch (error) {
           console.error('Failed to fetch OpenAI structured actions', error)
-          const message =
-            error instanceof Error
-              ? error.message
-              : 'Failed to fetch structured actions from OpenAI.'
-          toast.error(message)
+          toast.error('We couldn’t analyze this transcript. Please try again.')
           setLastAIComparison(null)
           return
         }
