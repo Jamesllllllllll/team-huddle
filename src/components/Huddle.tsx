@@ -5,6 +5,7 @@ import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useRouter, useNavigate, useSearch } from '@tanstack/react-router'
 import {
     huddleQueries,
+    userQueries,
     useAddObserverMutation,
     useAddParticipantMutation,
     useClearPresenceMutation,
@@ -109,7 +110,7 @@ import { requestHuddleAutoTitle } from '~/server/generateHuddleTitle'
 import { performResearch } from '~/server/research'
 import { Sparkles, Download, Trash2 } from 'lucide-react'
 import { Linear } from '~/components/assets/icons/LinearLogo'
-import { useCustomer } from 'autumn-js/react'
+import { useUpgradeCheckout } from '~/hooks/useUpgradeCheckout'
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../convex/_generated/api'
 import { FREE_HUDDLE_DURATION_MS } from '~/shared/huddle'
@@ -267,22 +268,12 @@ export function Huddle({ slug }: { slug: string }) {
             }
         }, [profile.name, isReady])
 
-        // Subscription status from Autumn
-        const { customer, checkout } = useCustomer()
-        const activeProductsForUser =
-            customer?.products?.filter((p) => p.status === 'active' || p.status === 'trialing') ?? []
-        const userHasActiveSubscription = activeProductsForUser.length > 0
-        const getBaseUrl = () =>
-            (typeof window !== 'undefined' ? window.location.origin : '') || 'http://localhost:3000'
-        const handleSubscribe = useCallback(async () => {
-            const { data } = await checkout({
-                productId: 'team_huddle_basic',
-                successUrl: getBaseUrl(),
-            })
-            if (data?.url) {
-                window.location.href = data.url
-            }
-        }, [checkout])
+        const { startCheckout, isBusy: isCheckoutBusy, isAuthenticated } = useUpgradeCheckout()
+        const { data: subscriptionStatus } = useQuery({
+            ...userQueries.subscriptionStatus(),
+            enabled: isAuthenticated,
+        })
+        const userHasActiveSubscription = isAuthenticated && !!subscriptionStatus?.hasActiveSubscription
         // Detect if the huddle ended due to the free time limit (explicit flag from server)
         const endedByTimeLimit = huddle.endedByTimeLimit === true
 
@@ -2157,7 +2148,7 @@ export function Huddle({ slug }: { slug: string }) {
                     // Show End button when active; when completed, only allow restart if not time-limited
                     isHuddleActive || (!isTimeLimited && isHuddleCompleted)
                 }
-                onSubscribe={isOwner && !userHasActiveSubscription ? handleSubscribe : undefined}
+                onSubscribe={isOwner && !userHasActiveSubscription ? startCheckout : undefined}
                 onStartHuddle={handleStartHuddle}
                 onEndHuddle={handleEndHuddle}
                 onJoin={handleJoin}
@@ -2408,8 +2399,9 @@ export function Huddle({ slug }: { slug: string }) {
                         onAutoEnd={handleAutoEndHuddle}
                         isOwner={isOwner}
                         hasActiveSubscription={userHasActiveSubscription}
+                        isCheckoutBusy={isCheckoutBusy}
                         onSubscribe={
-                            isOwner && !userHasActiveSubscription ? handleSubscribe : undefined
+                            isOwner && !userHasActiveSubscription ? startCheckout : undefined
                         }
                     />
                 ) : null}

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '~/components/ui/button'
 import { useUpdateSubscriptionStatusMutation, userQueries } from '~/queries'
+import { useUpgradeCheckout } from '~/hooks/useUpgradeCheckout'
 import { Spinner } from '~/components/ui/Spinner'
 
 /**
@@ -29,9 +30,9 @@ export function SubscriptionButton() {
  * Relies on Autumn's `useCustomer` for source of truth.
  */
 function AuthenticatedSubscriptionButton() {
-  const { customer, openBillingPortal, checkout, isLoading, refetch } = useCustomer()
+  const { customer, openBillingPortal, isLoading, refetch } = useCustomer()
   const updateSubscriptionStatus = useUpdateSubscriptionStatusMutation()
-  const [isUpgrading, setIsUpgrading] = useState(false)
+  const { startCheckout, isBusy: isUpgrading } = useUpgradeCheckout()
   const [isManaging, setIsManaging] = useState(false)
   const lastSyncedRef = useRef<{
     hasActive: boolean
@@ -156,14 +157,7 @@ function AuthenticatedSubscriptionButton() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          onClick={async () => {
-            if (isUpgrading) return
-            setIsUpgrading(true)
-            const { data } = await checkout({ productId: 'team_huddle_basic', successUrl: getBaseUrl() })
-            if (data?.url) {
-              window.location.href = data.url
-            }
-          }}
+          onClick={startCheckout}
           disabled={isUpgrading}
           className="inline-grid grid-cols-1 grid-rows-1 place-items-center rounded-md text-sm font-medium ring-offset-background transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-2 md:px-2.5 py-0 cursor-pointer"
         >

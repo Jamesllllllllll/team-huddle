@@ -15,11 +15,6 @@ export default defineConfig({
     globals: true,
     css: true,
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-      },
-    },
     testTimeout: 10000,
     hookTimeout: 10000,
     coverage: {

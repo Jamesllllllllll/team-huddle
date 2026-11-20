@@ -10,6 +10,7 @@ type FreeHuddleTimerProps = {
     onAutoEnd: () => void
     isOwner?: boolean
     hasActiveSubscription?: boolean
+    isCheckoutBusy: boolean
     onSubscribe?: () => void
 }
 
@@ -19,9 +20,9 @@ export function FreeHuddleTimer({
     onAutoEnd,
     isOwner = false,
     hasActiveSubscription = false,
+    isCheckoutBusy,
     onSubscribe,
 }: FreeHuddleTimerProps) {
-    const [loading, setLoading] = useState(false)
     const [currentTime, setCurrentTime] = useState(Date.now())
     const hasCalledAutoEnd = useRef(false)
 
@@ -146,21 +147,17 @@ export function FreeHuddleTimer({
                     {isOwner && !hasActiveSubscription && onSubscribe ? (
                         <button
                             type="button"
-                            onClick={async () => {
-                                if (loading) return
-                                setLoading(true)
-                                await Promise.resolve(onSubscribe())
-                            }}
-                            disabled={loading}
+                            onClick={onSubscribe}
+                            disabled={isCheckoutBusy}
                             className="cursor-pointer text-gray-900 dark:text-gray-100 underline underline-offset-2 hover:opacity-80 transition inline-flex items-center gap-1"
                         >
-                            {loading ? (
+                            {isCheckoutBusy ? (
                                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                 </svg>
                             ) : null}
-                            {loading ? 'One moment…' : 'Upgrade to make this go away!'}
+                            {isCheckoutBusy ? 'One moment…' : 'Upgrade to make this go away!'}
                         </button>
                     ) : (
                         'Huddle will end automatically when time expires'
